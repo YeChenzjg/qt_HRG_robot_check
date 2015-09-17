@@ -75,11 +75,6 @@ int main(int argc, char *argv[])
     view.rootContext()->setContextProperty("settings", &settings);
     view.rootContext()->setContextProperty("mainWindow", &view);
     view.setSource(QUrl("qrc:/robo/qml/hitRobotGroup/MainPage.qml"));
-//    view.setFlags(Qt::FramelessWindowHint|
-//                  Qt::Window
-//                  );
-
-
     view.show();
 
     return a.exec();

@@ -92,7 +92,6 @@ Rectangle {
                 ""
             else ""
         }
-        onLoaded: gc()
     }
 
 }

@@ -1,7 +1,4 @@
 # Add more folders to ship with the application, here
-#folder_01.source = qml/waveFormPage
-#folder_01.target = qml
-#DEPLOYMENTFOLDERS = folder_01
 QT+=qml xml core
 INCLUDEPATH += comu appLayer
 TARGET = HRG_PAD_TOOLS

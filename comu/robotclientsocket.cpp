@@ -7,11 +7,11 @@ robotClientSocket::robotClientSocket(CTransaction *pTransaction, DVRSettings set
     qRegisterMetaType<CONTROL_DATA>("CONTROL_DATA");
     QObject::connect(pTransaction, SIGNAL(connectTo(QString,int)), this, SLOT(connectTo(QString,int)));
     QObject::connect(pTransaction, SIGNAL(disConnect()), this, SLOT(disConnectFromServer()));
-    QObject::connect(&m_tcpSocket, SIGNAL(connected()), pTransaction, SIGNAL(serverConnected()));
+    QObject::connect(&m_tcpSocket, SIGNAL(connected()), pTransaction, SLOT(serverConnectedSlot()));
     QObject::connect(&m_tcpSocket,SIGNAL(connected()), this, SLOT(OnConnected()));
     QObject::connect(&m_tcpSocket, SIGNAL(readyRead()), this, SLOT(receiveData()));
     QObject::connect(&m_tcpSocket, SIGNAL(disconnected()), this, SLOT(OnDisConnected()));
-    QObject::connect(&m_tcpSocket, SIGNAL(disconnected()), pTransaction, SIGNAL(serverDisConnected()));
+    QObject::connect(&m_tcpSocket, SIGNAL(disconnected()), pTransaction, SLOT(serverDisConnectedSlot()));
     QObject::connect(this, SIGNAL(sendRobotData(ROBOT_DATA, QByteArray)), pTransaction, SLOT(proRobotDevice(ROBOT_DATA, QByteArray)));
     QObject::connect(&robotCheck, SIGNAL(robotData(ROBOT_DATA, QByteArray)), this, SLOT(robotData(ROBOT_DATA, QByteArray)));
     QObject::connect(pTransaction, SIGNAL(sendControlData(CONTROL_DATA)),this, SLOT(writeData(CONTROL_DATA)));
@@ -41,12 +41,11 @@ void robotClientSocket::connectTo(QString IP, int port)
     int reconnect = 0;
     settings.IP = IP;
     settings.server_port = port;
-    m_tcpSocket.disconnectFromHost();
+    //m_tcpSocket.disconnectFromHost();
     while(!m_bConnected && reconnect < RECONNECTCOUNT)
     {
         m_tcpSocket.connectToHost(IP, port);
         m_tcpSocket.waitForConnected();
-        Sleep(5);
         reconnect++;
     }
     reconnect = 0;
@@ -65,7 +64,7 @@ void robotClientSocket::OnConnected()
 void robotClientSocket::OnDisConnected()
 {
     m_bConnected = false;
-    connectTo(settings.IP, settings.server_port);
+    //connectTo(settings.IP, settings.server_port);
 }
 
 void robotClientSocket::writeData(CONTROL_DATA data)

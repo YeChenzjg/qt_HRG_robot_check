@@ -112,7 +112,6 @@ Rectangle {
         clip: true
         source: "qrc:/robo/qml/hitRobotGroup/HomeInfoPage.qml"
         onLoaded: {
-            gc()
             if(pathLoader.item.datamodel !== "undefined")
                 pathLoader.item.datamodel = dataModel
             if(pathLoader.item.currentNum !== "undefined" && pathLoader.currentNum > 0)
@@ -236,41 +235,14 @@ Rectangle {
     }
     Connections{
         target:transaction
-//        onUploadRobotDevice:{
-//            dataCount++
-//            RobotOP.addRobotModelData(dataModel, t_device)
-//            if(dataCount >= 100){
-//                detailInfoArea.remove(0,detailInfoArea.text.length)
-//                dataCount = 0;
-//            }
-//            detailInfoArea.append( s_data)
-//            t_device = null
-//            s_data = null
-
-//        }
+        onUploadRobotDevice:{
+            RobotOP.addRobotModelData(dataModel, t_device)
+        }
         onOffLine:{
             RobotOP.setOffLineStatus(dataModel, num)
         }
+        onServerDisConnected: dataModel.clear()
     }
-    Timer{
-        running: true
-        interval: 60000
-        repeat: true
-        onTriggered: {
-            RobotOP.clearOffLine(dataModel)
-        }
-    }
-    Timer{
-        running: true
-        interval: 20
-        repeat: true
-        onTriggered: {
-            var dataList = transaction.structToJson()
-            for(var i = 0; i < dataList.length; i++)
-                RobotOP.addRobotModelData(dataModel, dataList[i])
-        }
-    }
-
     onStateChanged: {
         if(state === "max"){
             mainWindow.setX(0)

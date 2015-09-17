@@ -11,6 +11,7 @@ Rectangle{
         value = (t_value)
         canvas.requestPaint()
     }
+    onValueChanged: canvas.requestPaint()
     Canvas {
         id: canvas
         anchors.fill: parent

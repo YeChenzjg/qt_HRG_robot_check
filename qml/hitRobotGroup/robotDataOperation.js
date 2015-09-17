@@ -28,7 +28,7 @@ function addRobotModelData(model, t_data){
                          "rob_error_id":objdata.rob_error_id,"offline":0,"rob_leftoff":isOff(0,objdata.rob_error_id),
                          "rob_rightoff":isOff(1,objdata.rob_error_id)})
     }
-    gc()
+
 }
 //显示断线机器人
 function setOffLineStatus(model, num){
@@ -36,7 +36,6 @@ function setOffLineStatus(model, num){
     for(var i = 0; i < model.count; i++){
         if(num === model.get(i).rob_num){
             model.set(i,{"offline":1})
-            gc()
         }
     }
     changeFlag = 0;
@@ -49,12 +48,8 @@ function clearOffLine(model){
         if(model.get(i).offline){
             model.remove(i, 1)
             i = i - 1
-            gc()
         }
-        i = i < 0?0:i
     }
-    if(model.count === 0)
-        model.clear()
     changeFlag = 0;
 }
 //判断轮子是否断线

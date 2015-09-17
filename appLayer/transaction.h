@@ -18,7 +18,7 @@
 #define TS_D_Value 100
 #define MS_D_Value 100
 #define BT_D_Value 0.1
-#define OFFLINE_TIME 10000
+#define OFFLINE_TIME 30000
 #define CONTROLRESENDRATE 20
 class CTransaction : public QObject
 {
@@ -44,9 +44,10 @@ public:
     Q_INVOKABLE void exitSys();
     Q_INVOKABLE void sendManualControlDataFromQML(int num, char move, char tracking, char turn, int mp3_num);
     Q_INVOKABLE QVariantList structToJson();
+    Q_INVOKABLE bool socketOffLine();
 signals:
     //robot signals
-    void uploadRobotDevice(QVariant t_device, QByteArray s_data);
+    void uploadRobotDevice(QVariant t_device);
     void serverConnected();
     void serverDisConnected();
     void offLine(int num);
@@ -58,6 +59,8 @@ public slots:
     void proRobotDevice(ROBOT_DATA t_data, QByteArray);
     void deleteOffRob();
     void reSendControl();
+    void serverConnectedSlot();
+    void serverDisConnectedSlot();
 private:
     QList<ROBOT_DATA> statusDataBuf;
     QList<ROBOT_DATA> offLineDataBuf;
@@ -66,6 +69,7 @@ private:
     QTimer *controlResultTimer;
     int resendCount;
     CONTROL_DATA currentControl;
+    bool m_offLine;
 };
 
 #endif // APPLAYER_H

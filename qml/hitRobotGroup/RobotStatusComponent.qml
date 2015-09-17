@@ -12,6 +12,7 @@ Rectangle {
     property bool serverConnected: false
     property ListModel model: null
     property int r_num: -1
+    property var currentDataObj: "undefined"
     Rectangle{
         id: title_label
         anchors.left: parent.left
@@ -61,6 +62,15 @@ Rectangle {
                         id: robotFace
                         width: parent.width/2
                         height: parent.height
+                        state: {
+                            if(currentDataObj === "undefined")
+                                "unnormal"
+                            else{
+                                if(currentDataObj.rob_error_id)
+                                    "unnormal"
+                                else "normal"
+                            }
+                        }
                     }
                     Column{
                        width: comRec.rowWidth
@@ -71,24 +81,28 @@ Rectangle {
                            width: comRec.labelWidth
                            height: comRec.labelHeight
                            text:"卡号"
+                           value: currentDataObj==="undefined"?-1:currentDataObj.rob_IDCard
                        }
                        RobInfoLabel{
                            id: x_label
                            width: comRec.labelWidth
                            height: comRec.labelHeight
                            text: "相对坐标x"
+                           value: currentDataObj==="undefined"?-1:currentDataObj.rob_x+"mm"
                        }
                        RobInfoLabel{
                            id: y_label
                            width: comRec.labelWidth
                            height: comRec.labelHeight
                            text: "相对坐标y"
+                           value: currentDataObj==="undefined"?-1:currentDataObj.rob_y+"mm"
                        }
                        RobInfoLabel{
                            id: r_label
                            width: comRec.labelWidth
                            height: comRec.labelHeight
                            text: "相对弧度"
+                           value: currentDataObj==="undefined"?-1:currentDataObj.rob_round
                        }
                     }
                 }
@@ -111,6 +125,7 @@ Rectangle {
                             }
                             width: comRec.labelWidth
                             height: comRec.labelHeight
+                            value:currentDataObj==="undefined"?-1:RobotOP.formatfloat((1-Number(currentDataObj.rob_CPU_idle)/72000)*100,0).toString()+"%"
                         }
                         Rectangle{
                             color: "transparent"
@@ -126,7 +141,7 @@ Rectangle {
                                 anchors.centerIn: parent
                                 width: parent.width>parent.height?parent.height -2:parent.width -2
                                 height: width
-
+                                value: currentDataObj==="undefined"?-1:RobotOP.formatfloat((1-Number(currentDataObj.rob_CPU_idle)/72000)*100,0)
                             }
                         }
                     }
@@ -167,6 +182,7 @@ Rectangle {
                                 horizontalAlignment: Text.AlignHCenter
                                 verticalAlignment: Text.AlignVCenter
                                 color: "white"
+                                text: currentDataObj==="undefined"?"EMPTY":RobotOP.carError(currentDataObj.rob_error_id)
                             }
                         }
                     }
@@ -181,12 +197,14 @@ Rectangle {
                    width: comRec.labelWidth
                    height: comRec.labelHeight
                    text: "前进速度"
+                   value:currentDataObj==="undefined"?-1:currentDataObj.rob_forward_speed*0.1+"m/s"
                }
                RobInfoLabel{
                    id:rs_label
                    width: comRec.labelWidth
                    height: comRec.labelHeight
                    text: "转向速度"
+                   value:currentDataObj==="undefined"?-1:currentDataObj.rob_turn_speed
 
                }
                RobInfoLabel{
@@ -194,6 +212,7 @@ Rectangle {
                    width: comRec.labelWidth
                    height: comRec.labelHeight
                    text: "状态"
+                   value:currentDataObj==="undefined"?-1:RobotOP.carState(currentDataObj.rob_car_status)
 
                }
                RobInfoLabel{
@@ -201,7 +220,7 @@ Rectangle {
                    width: comRec.labelWidth
                    height: comRec.labelHeight
                    text: "状态机"
-
+                   value: currentDataObj==="undefined"?-1:RobotOP.carSM(currentDataObj.rob_car_status_machine)
                }
                RobInfoLabel{
                    id:ms_label
@@ -209,18 +228,21 @@ Rectangle {
                    height: comRec.labelHeight
                    text: "磁条位置"
                    fontSize: 20
+                   value: currentDataObj==="undefined"?-1:currentDataObj.rob_ms_position
                }
                RobInfoLabel{
                    id:battery_label
                    width: comRec.labelWidth
                    height: comRec.labelHeight
                    text: "电池电压"
+                   value: currentDataObj==="undefined"?-1:RobotOP.formatfloat(currentDataObj.rob_power*0.1500,2)+"V"
                }
                RobInfoLabel{
                    id: r_forbiden
                    width: comRec.labelWidth
                    height: comRec.labelHeight
                    text: "当前禁区"
+                   value: currentDataObj==="undefined"?-1:currentDataObj.rob_forbiden
                }
             }
         }
@@ -231,32 +253,32 @@ Rectangle {
             return;
         for(var i = 0; i < model.count; i++){
             if(model.get(i).rob_num === num){
+                return model.get(i);
                 //cpu_idle.value = RobotOP.formatfloat(Number(model.get(i).rob_CPU_idle)*100/72000,0).toString()+"%"
                 //idle_board.changeValue(RobotOP.formatfloat(Number(model.get(i).rob_CPU_idle)*100/72000,0))
-                cpu_used.value =  RobotOP.formatfloat((1-Number(model.get(i).rob_CPU_idle)/72000)*100,0).toString()+"%"
-                used_board.changeValue(RobotOP.formatfloat((1-Number(model.get(i).rob_CPU_idle)/72000)*100,0))
-                id_label.value = model.get(i).rob_IDCard
-                x_label.value = model.get(i).rob_x+"mm"
-                y_label.value = model.get(i).rob_y+"mm"
-                r_label.value = model.get(i).rob_round
-                fs_label.value = model.get(i).rob_forward_speed*0.1+"m/s"
-                rs_label.value = model.get(i).rob_turn_speed
-                status_label.value = RobotOP.carState(model.get(i).rob_car_status)
-                sm_label.value = RobotOP.carSM(model.get(i).rob_car_status_machine)
-                ms_label.value = model.get(i).rob_ms_position
-                battery_label.value = RobotOP.formatfloat(model.get(i).rob_power*0.1500,2)+"V"
-                error_label.text = RobotOP.carError(model.get(i).rob_error_id)
-                robotFace.setStatus(model.get(i).rob_error_id)
-                r_forbiden.value = model.get(i).rob_forbiden
+//                cpu_used.value =  RobotOP.formatfloat((1-Number(model.get(i).rob_CPU_idle)/72000)*100,0).toString()+"%"
+//                used_board.changeValue(RobotOP.formatfloat((1-Number(model.get(i).rob_CPU_idle)/72000)*100,0))
+//                id_label.value = model.get(i).rob_IDCard
+//                x_label.value = model.get(i).rob_x+"mm"
+//                y_label.value = model.get(i).rob_y+"mm"
+//                r_label.value = model.get(i).rob_round
+//                fs_label.value = model.get(i).rob_forward_speed*0.1+"m/s"
+//                rs_label.value = model.get(i).rob_turn_speed
+//                status_label.value = RobotOP.carState(model.get(i).rob_car_status)
+//                sm_label.value = RobotOP.carSM(model.get(i).rob_car_status_machine)
+//                ms_label.value = model.get(i).rob_ms_position
+//                battery_label.value = RobotOP.formatfloat(model.get(i).rob_power*0.1500,2)+"V"
+//                error_label.text = RobotOP.carError(model.get(i).rob_error_id)
+//                robotFace.setStatus(model.get(i).rob_error_id)
+//                r_forbiden.value = model.get(i).rob_forbiden
             }
         }
-        gc()
     }
-    Connections{
-        target: transaction
-        onUploadRobotDevice:updateRobData(r_num)
-    }
+//    Connections{
+//        target: transaction
+//        onUploadRobotDevice:updateRobData(r_num)
+//    }
     Component.onCompleted: {
-        updateRobData(r_num)
+       currentDataObj = updateRobData(r_num)
     }
 }

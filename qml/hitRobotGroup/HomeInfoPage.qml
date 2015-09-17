@@ -20,11 +20,12 @@ Rectangle {
         id:gridDelegate
         RobErrorLabel{
             id: com_root
-            width: gridView.cellWidth - 5
-            height: gridView.cellHeight - 5
+            width: offline? 0:gridView.cellWidth - 5
+            height: offline?0:gridView.cellHeight - 5
             errorCode: Number(rob_error_id)
             leftoff: rob_leftoff
             rightoff: rob_rightoff
+            offLine: offline
             state: rob_error_id === 0?"normal":"unnormal"
 
 

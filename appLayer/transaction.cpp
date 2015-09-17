@@ -98,18 +98,18 @@ void CTransaction::proRobotDevice(ROBOT_DATA t_data, QByteArray s_data)
     if(change == 1 ||
             statusDataBuf.count() == i)
     {
-//        robotStatusData * deviceData= new robotStatusData(t_data);
-//        QVariantMap deviceMap = toVariantMap(deviceData);
-//        QVariant deviceJson = toJsonVariant(deviceMap);
-//        //emit uploadRobotDevice(deviceJson, s_data.toHex());
-//        deviceMap.clear();
-//        deviceJson.clear();
+        robotStatusData * deviceData= new robotStatusData(t_data);
+        QVariantMap deviceMap = toVariantMap(deviceData);
+        QVariant deviceJson = toJsonVariant(deviceMap);
+        emit uploadRobotDevice(deviceJson);
+        deviceMap.clear();
+        deviceJson.clear();
         statusDataBuf.append(t_data);
-//        if(deviceData != NULL)
-//        {
-//            delete deviceData;
-//            deviceData = NULL;
-//        }
+        if(deviceData != NULL)
+        {
+            delete deviceData;
+            deviceData = NULL;
+        }
     }
 }
 ROBOT_DATA CTransaction::checkMeaningful(ROBOT_DATA old_data, ROBOT_DATA new_data, int &change)
@@ -183,15 +183,14 @@ QVariantList CTransaction::getStatusData()
 
 void CTransaction::deleteOffRob()
 {
+    offlineTimer->stop();//计时器停止
+    changing = true;//停止接收数据
     for(int i =0; i< offLineDataBuf.count(); i++)
     {
         for(int j = 0; j < statusDataBuf.count(); j++)
         {
            if((ROBOT_DATA)offLineDataBuf.at(i) == (ROBOT_DATA)statusDataBuf.at(j))
            {
-
-               changing = true;//停止接收数据
-               offlineTimer->stop();//计时器停止
                emit offLine(statusDataBuf.at(j).hrg_num);//发送断线信号到界面
                statusDataBuf.removeAt(j);//删除断线的设备
                break;
@@ -258,17 +257,39 @@ void CTransaction::reSendControl()
 
 QVariantList CTransaction::structToJson()
 {
-    changing = true;
+    if(changing)
+        return QVariantList();
+    //changing = true;
+    QList<ROBOT_DATA> tmpData = statusDataBuf;
     QVariantList list;
-    for(int i = 0; i < statusDataBuf.count(); i++){
-        robotStatusData * deviceData= new robotStatusData(statusDataBuf.at(i));
+    for(int i = 0; i < tmpData.count(); i++){
+        qDebug()<<"get data";
+        robotStatusData * deviceData= new robotStatusData(tmpData.at(i));
         QVariantMap deviceMap = toVariantMap(deviceData);
         QVariant deviceJson = toJsonVariant(deviceMap);
         list.append(deviceJson);
         if(deviceData != NULL)
             delete deviceData;
         deviceData = NULL;
+        qDebug()<<"get done";
     }
-    changing = false;
+    tmpData.clear();
+    //changing = false;
     return list;
+}
+
+bool CTransaction::socketOffLine()
+{
+    return m_offLine;
+}
+
+void CTransaction::serverConnectedSlot()
+{
+    m_offLine = false;
+    emit serverConnected();
+}
+void CTransaction::serverDisConnectedSlot()
+{
+    m_offLine = true;
+    emit serverDisConnected();
 }
