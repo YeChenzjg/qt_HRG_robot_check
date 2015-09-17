@@ -1,0 +1,102 @@
+﻿#ifndef APPLAYER_H
+#define APPLAYER_H
+
+#include <QObject>
+#include "device.h"
+#include "instantdata.h"
+#include "wavedata.h"
+#include "CDBPool.h"
+#include "U_Event_Wave.h"
+#include "U_IGBT_Real_Value.h"
+#include "U_Device_Day_Report.h"
+class appLayer : public QObject
+{
+    Q_OBJECT
+public:
+    typedef enum{
+        enumUPQC,
+        enumDVR
+    }DEVICE_TYPE;
+
+    typedef enum{
+        enumWARN,
+        enumEVENT
+    }INSTANT_TYPE;
+
+    typedef enum{
+        enumLeft,
+        enumRight,
+        enumBottom,
+        enumTop
+    }PAGE_STATUS;
+    typedef enum{
+        enum1,
+        enum2,
+        enum3,
+        enum4
+    }WARN_TYPE;
+    typedef enum{
+        enum1,
+        enum2,
+        enum3
+    }EVENT_TYPE;
+public:
+    explicit appLayer(QObject *parent = 0);
+private:
+    //初始化成员对象
+    int initDevice(DEVICE_TYPE);
+    int initInstantData(INSTANT_TYPE);
+    int initWaveData(DEVICE_TYPE);
+    int initDBPool();
+
+    //清空数据成员对象
+    void clearDevice();
+    void clearInstantData();
+    void clearWaveData();
+    //注销成员对象
+    void destoryDevice();
+    void destoryInstantData();
+    void destoryWaveData();
+    void destoryPool();
+public:
+    //更新设备数据
+    int updateDevice(device* t_device);
+    //上报非定时数据（事件或者报警数据）
+    int updateInstantData(instantData* t_data);
+    //存储录播数据
+    int updateWaveData(waveData *t_data);
+    //录波数据解析
+
+    //录波数据查询
+    Q_INVOKABLE QStringList searchWaveList(int eid, int num);
+    //告警知识查询
+    Q_INVOKABLE QString searchWarnDetail(WARN_TYPE t_type);
+    //故障信息查询
+
+    //IGBT报表查询
+    Q_INVOKABLE U_IGBT_Real_Value* searchIGBTReport();
+    //设备报表查询
+    Q_INVOKABLE U_Device_Day_Report* searchDeviceReport();
+    
+
+signals:
+    void uploadDevice(device*);
+    void uploadInstantData(instantData*);
+    void uploadWaveData(waveData*);
+public slots:
+    void setPage(QString position);
+private:
+    device *m_p_device;
+    instantData *m_p_istData;
+    waveData *m_p_wdata;
+    CDBPool *m_p_pool;
+
+    bool m_b_deviceisnull;
+    bool m_b_instantisnull;
+    bool m_b_wavedataisnull;
+    bool m_b_poolisnull;
+
+    PAGE_STATUS m_n_position;
+};
+
+#endif // APPLAYER_H
